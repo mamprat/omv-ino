@@ -1,57 +1,53 @@
-//======= sensor arus ==========
+//======= library =======
 #include "EmonLib.h"
+#include <SoftwareSerial.h>
 
-//======= sensor & pin untuk MAX485 =======
+//======= alamat =======
 const int sensor = 1;  //A1
-#define DE_PIN 2 // Driver Enable
-#define RE_PIN 3 // Receiver Enable
+//MAX485
+#define DE 3  //MAX485 to arduino D3
+#define RE 2  //MAX485 to arduino D2
 
-//======= Inisialisasi =======
+SoftwareSerial RS485Serial(10, 11); // RX, TX
+
+//======= inisialisasi =======
 EnergyMonitor emon1;
 const int threshold = 100;
-
 static unsigned long OnDelay;
-unsigned long TimeOn = 20000;  // 30 Seconds
+unsigned long TimeOn = 20000;
 
 void setup() {
-  Serial.begin(9600);
-  delay(100);
+  // Initialize the serial communication
+  Serial.begin(9600); // cuman buat di serial monitor
+  RS485Serial.begin(9600); //komunikasi RS485
   emon1.current(sensor, 600.600);
+  delay(100);
 
-  // Inisialisasi pin untuk mengontrol MAX485
-  pinMode(DE_PIN, OUTPUT);
-  pinMode(RE_PIN, OUTPUT);
+  // Set the DE and RE pins as outputs
+  pinMode(DE, OUTPUT);
+  pinMode(RE, OUTPUT);
 
-  // Aktifkan mode penerimaan
-  digitalWrite(DE_PIN, LOW); // DE = 0
-  digitalWrite(RE_PIN, HIGH); // RE = 1
+  // Set DE and RE high to enable transmission mode or WRITE
+  digitalWrite(DE, HIGH);
+  digitalWrite(RE, HIGH);
 
-  OnDelay = 0 - TimeOn;
-  // Tunggu sejenak
-  delay(1000);
+  //  // Set DE and RE low to enable receiving mode or READ
+  //  digitalWrite(DE, LOW);
+  //  digitalWrite(RE, LOW);
 }
 
 void loop() {
-  //======= Aktifkan mode transmisi =======
-  digitalWrite(DE_PIN, HIGH); // DE = 1
-  digitalWrite(RE_PIN, LOW); // RE = 0
-
-  //======= Sensor baca =======
-  int Irms = emon1.calcIrms(1480);  // Calculate Irms only
+  int Irms = emon1.calcIrms(1480);
   if (Irms > threshold) {
     OnDelay = millis();
   }
 
   if (millis() - OnDelay >= (TimeOn)) {
+    RS485Serial.write(Irms);
     Serial.println(Irms);
-    delay(500);
   } else {
+    RS485Serial.write(Irms);
     Serial.println(Irms);
-    delay(500);
   }
-  // Matikan mode transmisi dan aktifkan mode penerimaan
-  digitalWrite(DE_PIN, LOW); // DE = 0
-  digitalWrite(RE_PIN, HIGH); // RE = 1
-
-  delay(1000);
+  delay(500);
 }
