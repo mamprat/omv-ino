@@ -1,12 +1,21 @@
+/* kalo mau kirim data dari arduino ke PC
+  RO = **RX (kosong juga gpp)
+  RE = HIGH masuk ke pin Digial (kasih 5volt klo pin tidak di inisial) (aslinya klo mau slave nerima itu harus low)
+  DE = HIGH masuk ke pin Digital (kasih 5volt klo pin tidak di inisial)**TRANSMIT TX
+  DI = TX
+
+  VCC  = 5V
+  B = USB_B
+  A = USB_A
+  GND = GND */
+
 //======= library =======
 #include "EmonLib.h"
 #include <SoftwareSerial.h>
 
 //======= alamat =======
 const int sensor = 1;  //A1
-//MAX485
 #define DE 3  //MAX485 to arduino D3
-#define RE 2  //MAX485 to arduino D2
 
 SoftwareSerial RS485Serial(10, 11); // RX, TX
 
@@ -17,7 +26,6 @@ static unsigned long OnDelay;
 unsigned long TimeOn = 20000;
 
 void setup() {
-  // Initialize the serial communication
   Serial.begin(9600); // cuman buat di serial monitor
   RS485Serial.begin(9600); //komunikasi RS485
   emon1.current(sensor, 600.600);
@@ -25,15 +33,9 @@ void setup() {
 
   // Set the DE and RE pins as outputs
   pinMode(DE, OUTPUT);
-  pinMode(RE, OUTPUT);
 
-  // Set DE and RE high to enable transmission mode or WRITE
-  digitalWrite(DE, HIGH);
-  digitalWrite(RE, HIGH);
-
-  //  // Set DE and RE low to enable receiving mode or READ
-  //  digitalWrite(DE, LOW);
-  //  digitalWrite(RE, LOW);
+  // Set DE to enable transmission mode or WRITE
+  digitalWrite(DE, HIGH); //HIGH (kasih 5volt)**TRANSMIT TX
 }
 
 void loop() {
@@ -43,11 +45,11 @@ void loop() {
   }
 
   if (millis() - OnDelay >= (TimeOn)) {
-    RS485Serial.write(Irms);
-    Serial.println(Irms);
+    RS485Serial.println(Irms);
+    digitalWrite(DE, HIGH);
   } else {
-    RS485Serial.write(Irms);
-    Serial.println(Irms);
+    RS485Serial.println(Irms);
+    digitalWrite(DE, HIGH);
   }
   delay(500);
 }
