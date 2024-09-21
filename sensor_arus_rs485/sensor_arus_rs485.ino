@@ -17,7 +17,7 @@
 const int sensor = 1;  //A1
 #define DE 3  //MAX485 to arduino D3
 
-SoftwareSerial RS485Serial(10, 11); // RX, TX
+SoftwareSerial RS485Serial(10, 11); // RX = RO, TX = DI
 
 //======= inisialisasi =======
 EnergyMonitor emon1;
