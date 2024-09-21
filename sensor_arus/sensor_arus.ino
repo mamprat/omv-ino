@@ -1,3 +1,6 @@
+//tipe sensor yang digunakan adalah Sct 019
+
+
 //======= sensor arus ==========
 #include "EmonLib.h"
 
